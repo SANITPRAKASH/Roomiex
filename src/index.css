@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Define colors using the @theme directive */
+  --color-background: hsl(0 0% 99%);
+  --color-foreground: hsl(220 25% 10%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(220 25% 10%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(220 25% 10%);
+  
+  /* Primary - Warm Coral */
+  --color-primary: hsl(12 76% 61%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-primary-light: hsl(12 80% 95%);
+  --color-primary-glow: hsl(12 76% 70%);
+  
+  /* Secondary - Cool Teal */
+  --color-secondary: hsl(174 62% 47%);
+  --color-secondary-foreground: hsl(0 0% 100%);
+  --color-secondary-light: hsl(174 60% 95%);
+  
+  /* Accent - Soft Lavender */
+  --color-accent: hsl(250 40% 96%);
+  --color-accent-foreground: hsl(220 25% 10%);
+  --color-muted: hsl(220 14% 96%);
+  --color-muted-foreground: hsl(220 10% 45%);
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-border: hsl(220 13% 91%);
+  --color-input: hsl(220 13% 91%);
+  --color-ring: hsl(12 76% 61%);
+  --color-success: hsl(145 63% 42%);
+  --color-success-foreground: hsl(0 0% 100%);
+  --color-warning: hsl(38 92% 50%);
+  --color-warning-foreground: hsl(0 0% 100%);
+  
+  /* Border radius */
+  --radius-sm: 0.5rem;
+  --radius: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+}
+
+/* Keep regular CSS variables for things you want to reference in regular CSS */
+:root {
+  --font-outfit: 'Outfit', sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: hsl(220 13% 91%);
+  }
+  
+  body {
+    background-color: hsl(0 0% 99%);
+    color: hsl(220 25% 10%);
+    font-family: var(--font-outfit);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-outfit);
+    letter-spacing: -0.025em;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(to right, hsl(12 76% 61%), hsl(30 85% 60%), hsl(174 62% 47%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .card-elevated {
+    background-color: hsl(0 0% 100%);
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    transition: box-shadow 0.2s;
+  }
+  
+  .card-elevated:hover {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+  
+  .glass-card {
+    backdrop-filter: blur(24px);
+    background-color: hsl(0 0% 100% / 0.8);
+    border: 1px solid hsl(220 13% 91% / 0.5);
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+}
