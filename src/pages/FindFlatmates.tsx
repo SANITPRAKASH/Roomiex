@@ -232,7 +232,7 @@ export default function FindFlatmates() {
         <ChatDialog
           open={chatOpen}
           onOpenChange={setChatOpen}
-          roomId="flatmate-chat"
+          roomId={null}  // ⭐ NULL for flatmate chats (no specific room)
           receiverId={selectedFlatmate.user_id}
           receiverName={selectedFlatmate.profile?.full_name || 'Flatmate'}
         />
