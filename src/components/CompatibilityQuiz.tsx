@@ -92,7 +92,7 @@ export function CompatibilityQuiz() {
                     </span>
                     <button 
                       onClick={resetQuiz}
-                      className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                      className="text-sm  text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
                       Start Over

@@ -330,7 +330,7 @@ export function ChatDialog({
                             {isOwn && (
                               <button
                                 onClick={() => deleteMessage(message.id)}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-primary-foreground/10 rounded"
+                                className=" cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-primary-foreground/10 rounded"
                                 aria-label="Delete message"
                               >
                                 <Trash2 className="w-3 h-3 text-primary-foreground/70 hover:text-primary-foreground" />
