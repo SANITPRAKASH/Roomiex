@@ -21,11 +21,13 @@ export function Navbar() {
   const { user, isLoading } = useAuth()
   const [unreadCount, setUnreadCount] = useState(0)
   const [savedCount, setSavedCount] = useState(0)
+  const [pendingBookingsCount, setPendingBookingsCount] = useState(0)
 
   useEffect(() => {
     if (!user) {
       setUnreadCount(0)
       setSavedCount(0)
+      setPendingBookingsCount(0)
       return
     }
 
@@ -54,19 +56,34 @@ export function Navbar() {
       }
     }
 
+    const fetchPendingBookingsCount = async () => {
+      try {
+        // Count bookings where user is the owner AND status is pending
+        const { count } = await supabase
+          .from('bookings')
+          .select('*', { count: 'exact', head: true })
+          .eq('owner_id', user.id)
+          .eq('status', 'pending')
+        setPendingBookingsCount(count || 0)
+      } catch (error) {
+        console.error('Error fetching pending bookings count:', error)
+      }
+    }
+
     fetchUnreadCount()
     fetchSavedCount()
+    fetchPendingBookingsCount()
 
     // Real-time subscription for unread messages
     const messagesChannel = supabase
       .channel(`unread-messages-${user.id}`)
       .on(
         'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
+        {
+          event: '*',
+          schema: 'public',
           table: 'messages',
-          filter: `receiver_id=eq.${user.id}`
+          filter: `receiver_id=eq.${user.id}`,
         },
         fetchUnreadCount
       )
@@ -77,19 +94,35 @@ export function Navbar() {
       .channel(`saved-rooms-${user.id}`)
       .on(
         'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
+        {
+          event: '*',
+          schema: 'public',
           table: 'saved_rooms',
-          filter: `user_id=eq.${user.id}`
+          filter: `user_id=eq.${user.id}`,
         },
         fetchSavedCount
+      )
+      .subscribe()
+
+    // Real-time subscription for pending bookings
+    const bookingsChannel = supabase
+      .channel(`pending-bookings-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'bookings',
+          filter: `owner_id=eq.${user.id}`,
+        },
+        fetchPendingBookingsCount
       )
       .subscribe()
 
     return () => {
       supabase.removeChannel(messagesChannel)
       supabase.removeChannel(savedChannel)
+      supabase.removeChannel(bookingsChannel)
     }
   }, [user])
 
@@ -165,10 +198,20 @@ export function Navbar() {
                 </Link>
                 <Link
                   to="/bookings"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 relative"
                 >
                   <Calendar className="w-4 h-4" />
                   Bookings
+                  {pendingBookingsCount > 0 && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                      className="absolute -top-1 -right-3 min-w-[18px] h-[18px] px-1 bg-orange-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold shadow-lg"
+                    >
+                      {pendingBookingsCount > 99 ? '99+' : pendingBookingsCount}
+                    </motion.span>
+                  )}
                 </Link>
               </>
             )}
@@ -192,9 +235,7 @@ export function Navbar() {
               </Link>
             ) : (
               <Link to="/auth">
-                <Button size="sm">
-                  Sign In
-                </Button>
+                <Button size="sm">Sign In</Button>
               </Link>
             )}
           </div>
@@ -276,20 +317,23 @@ export function Navbar() {
                     </Link>
                     <Link
                       to="/bookings"
-                      className="px-4 py-2.5 text-sm font-medium hover:bg-accent rounded-lg transition-colors flex items-center gap-2"
+                      className="px-4 py-2.5 text-sm font-medium hover:bg-accent rounded-lg transition-colors flex items-center justify-between"
                       onClick={() => setIsOpen(false)}
                     >
-                      <Calendar className="w-4 h-4" />
-                      Bookings
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        Bookings
+                      </div>
+                      {pendingBookingsCount > 0 && (
+                        <span className="min-w-[20px] h-5 px-1.5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                          {pendingBookingsCount > 99 ? '99+' : pendingBookingsCount}
+                        </span>
+                      )}
                     </Link>
                   </>
                 )}
                 <div className="flex gap-2 mt-2 px-4">
-                  <Link
-                    to="/list-room"
-                    className="flex-1"
-                    onClick={() => setIsOpen(false)}
-                  >
+                  <Link to="/list-room" className="flex-1" onClick={() => setIsOpen(false)}>
                     <Button variant="outline" size="sm" className="w-full">
                       List Room
                     </Button>
@@ -299,22 +343,14 @@ export function Navbar() {
                       <Loader2 className="w-4 h-4 animate-spin" />
                     </div>
                   ) : user ? (
-                    <Link
-                      to="/profile"
-                      className="flex-1"
-                      onClick={() => setIsOpen(false)}
-                    >
+                    <Link to="/profile" className="flex-1" onClick={() => setIsOpen(false)}>
                       <Button size="sm" className="w-full gap-2">
                         <User className="w-4 h-4" />
                         Profile
                       </Button>
                     </Link>
                   ) : (
-                    <Link
-                      to="/auth"
-                      className="flex-1"
-                      onClick={() => setIsOpen(false)}
-                    >
+                    <Link to="/auth" className="flex-1" onClick={() => setIsOpen(false)}>
                       <Button size="sm" className="w-full">
                         Sign In
                       </Button>

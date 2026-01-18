@@ -3,6 +3,7 @@ import { Heart, Loader2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 interface SaveRoomButtonProps {
   roomId: string
@@ -43,8 +44,12 @@ export function SaveRoomButton({ roomId, className = '' }: SaveRoomButtonProps) 
     e.stopPropagation()
 
     if (!user) {
-      alert('Please sign in to save rooms')
-      navigate('/auth')
+      toast.error('Please sign in to save rooms', {
+        action: {
+          label: 'Sign In',
+          onClick: () => navigate('/auth')
+        }
+      })
       return
     }
 
@@ -60,7 +65,11 @@ export function SaveRoomButton({ roomId, className = '' }: SaveRoomButtonProps) 
           .eq('room_id', roomId)
 
         if (error) throw error
+        
         setIsSaved(false)
+        toast.success('Removed from saved', {
+          description: 'Room removed from your collection',
+        })
       } else {
         // Save
         const { error } = await supabase.from('saved_rooms').insert({
@@ -69,11 +78,21 @@ export function SaveRoomButton({ roomId, className = '' }: SaveRoomButtonProps) 
         })
 
         if (error) throw error
+        
         setIsSaved(true)
+        toast.success('Saved to collection', {
+          description: 'View all saved rooms in your profile',
+          action: {
+            label: 'View',
+            onClick: () => navigate('/saved')
+          }
+        })
       }
     } catch (error) {
       console.error('Error toggling save:', error)
-      alert('Failed to save room')
+      toast.error('Failed to save room', {
+        description: 'Please try again',
+      })
     } finally {
       setIsLoading(false)
     }

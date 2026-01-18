@@ -25,6 +25,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 import { uploadMultipleImagesToS3 } from "@/lib/s3";
 import { analyzeRoomWithAI, type RoomAnalysis } from "@/lib/ai";
+import { toast } from "sonner";
 
 const AMENITIES = [
   "WiFi",
@@ -53,8 +54,6 @@ const steps = [
   { id: 3, title: "Pricing", icon: DollarSign },
   { id: 4, title: "AI Score", icon: Sparkles },
 ];
-
-// Replace ONLY the CategoryScoreCard function in your ListRoom.tsx with this:
 
 interface CategoryScoreCardProps {
   label: string;
@@ -117,7 +116,9 @@ export default function ListRoom() {
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length + formData.photos.length > 6) {
-      alert("Maximum 6 photos allowed");
+      toast.error("Maximum 6 photos allowed", {
+        description: "You can upload up to 6 photos per listing",
+      });
       return;
     }
 
@@ -149,7 +150,9 @@ export default function ListRoom() {
 
   const analyzeRoom = async () => {
     if (formData.photos.length === 0) {
-      alert("Please upload at least one photo");
+      toast.warning("Please upload at least one photo", {
+        description: "A photo is required for AI analysis",
+      });
       return;
     }
 
@@ -161,10 +164,14 @@ export default function ListRoom() {
         aiScore: analysis.overallScore,
         aiAnalysis: analysis,
       }));
-      alert("Room analyzed successfully!");
+      toast.success("Room analyzed successfully!", {
+        description: `Quality score: ${analysis.overallScore.toFixed(1)}/10`,
+      });
     } catch (error) {
       console.error("Analysis error:", error);
-      alert("Failed to analyze room. Please try again.");
+      toast.error("Failed to analyze room", {
+        description: "Please try again or contact support",
+      });
     } finally {
       setIsAnalyzing(false);
     }
@@ -172,7 +179,12 @@ export default function ListRoom() {
 
   const publishListing = async () => {
     if (!user) {
-      alert("Please sign in to publish your listing");
+      toast.error("Please sign in to publish your listing", {
+        action: {
+          label: "Sign In",
+          onClick: () => navigate("/auth"),
+        },
+      });
       return;
     }
 
@@ -181,7 +193,7 @@ export default function ListRoom() {
       // Upload photos to S3
       const photoUrls = await uploadMultipleImagesToS3(
         formData.photos,
-        "rooms",
+        "rooms"
       );
 
       // Convert room type to DB format
@@ -212,9 +224,14 @@ export default function ListRoom() {
       if (error) throw error;
 
       setIsPublished(true);
+      toast.success("Room listed successfully!", {
+        description: "Your listing is now live and visible to renters",
+      });
     } catch (error) {
       console.error("Publish error:", error);
-      alert("Failed to publish listing. Please try again.");
+      toast.error("Failed to publish listing", {
+        description: "Please try again or contact support",
+      });
     } finally {
       setIsPublishing(false);
     }
@@ -322,8 +339,7 @@ export default function ListRoom() {
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Add Photos</h2>
                   <p className="text-muted-foreground">
-                    Upload up to 6 photos. The first photo will be analyzed by
-                    AI.
+                    Upload up to 6 photos. The first photo will be analyzed by AI.
                   </p>
                 </div>
 
@@ -385,9 +401,7 @@ export default function ListRoom() {
               >
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Room Details</h2>
-                  <p className="text-muted-foreground">
-                    Tell us about your room
-                  </p>
+                  <p className="text-muted-foreground">Tell us about your room</p>
                 </div>
 
                 <div className="space-y-4">
@@ -542,9 +556,7 @@ export default function ListRoom() {
                           key={stay}
                           type="button"
                           variant={
-                            formData.minimumStay === stay
-                              ? "default"
-                              : "outline"
+                            formData.minimumStay === stay ? "default" : "outline"
                           }
                           size="sm"
                           onClick={() =>
@@ -563,7 +575,7 @@ export default function ListRoom() {
               </motion.div>
             )}
 
-            {/* Step 4: AI Score - ENHANCED */}
+            {/* Step 4: AI Score */}
             {currentStep === 4 && (
               <motion.div
                 key="ai-score"
@@ -577,13 +589,11 @@ export default function ListRoom() {
                     Get AI Quality Score
                   </h2>
                   <p className="text-muted-foreground">
-                    Our AI will analyze your room photos and provide a quality
-                    score.
+                    Our AI will analyze your room photos and provide a quality score.
                   </p>
                 </div>
 
                 {formData.aiScore === null ? (
-                  /* Before Analysis */
                   <div className="text-center py-12">
                     <div className="w-48 h-48 rounded-2xl overflow-hidden mx-auto mb-8 shadow-lg">
                       <img
@@ -612,14 +622,10 @@ export default function ListRoom() {
                     </Button>
                   </div>
                 ) : (
-                  /* After Analysis - Enhanced Results */
                   <div className="space-y-8">
-                    {/* Main Score with Circle Progress */}
                     <div className="flex flex-col md:flex-row items-center justify-center gap-8 py-6">
-                      {/* Circular Score Indicator */}
                       <div className="relative">
                         <svg className="w-48 h-48 transform -rotate-90">
-                          {/* Background circle */}
                           <circle
                             cx="96"
                             cy="96"
@@ -629,7 +635,6 @@ export default function ListRoom() {
                             fill="none"
                             className="text-muted/30"
                           />
-                          {/* Progress circle */}
                           <circle
                             cx="96"
                             cy="96"
@@ -651,12 +656,11 @@ export default function ListRoom() {
                         </div>
                       </div>
 
-                      {/* Score Description */}
                       <div className="max-w-md text-center md:text-left">
                         <h3 className="text-2xl text-neutral-700 font-bold mb-2">
                           Quality Score
                         </h3>
-                        <p className="text-lg font-medium  mb-3">
+                        <p className="text-lg font-medium mb-3">
                           {formData.aiScore >= 9
                             ? "Excellent"
                             : formData.aiScore >= 8
@@ -671,7 +675,6 @@ export default function ListRoom() {
                       </div>
                     </div>
 
-                    {/* Category Scores - First Row (3 items) */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <CategoryScoreCard
                         label="Lighting"
@@ -681,9 +684,7 @@ export default function ListRoom() {
                       <CategoryScoreCard
                         label="Cleanliness"
                         score={formData.aiAnalysis?.cleanliness.score || 0}
-                        feedback={
-                          formData.aiAnalysis?.cleanliness.feedback || ""
-                        }
+                        feedback={formData.aiAnalysis?.cleanliness.feedback || ""}
                       />
                       <CategoryScoreCard
                         label="Space"
@@ -692,25 +693,19 @@ export default function ListRoom() {
                       />
                     </div>
 
-                    {/* Category Scores - Second Row (2 items) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <CategoryScoreCard
                         label="Ventilation"
                         score={formData.aiAnalysis?.ventilation.score || 0}
-                        feedback={
-                          formData.aiAnalysis?.ventilation.feedback || ""
-                        }
+                        feedback={formData.aiAnalysis?.ventilation.feedback || ""}
                       />
                       <CategoryScoreCard
                         label="Furnishing"
                         score={formData.aiAnalysis?.furnishing.score || 0}
-                        feedback={
-                          formData.aiAnalysis?.furnishing.feedback || ""
-                        }
+                        feedback={formData.aiAnalysis?.furnishing.feedback || ""}
                       />
                     </div>
 
-                    {/* Publish Button */}
                     <div className="pt-4">
                       <Button
                         onClick={publishListing}
@@ -734,7 +729,6 @@ export default function ListRoom() {
             )}
           </AnimatePresence>
 
-          {/* Navigation */}
           <div className="flex justify-between mt-8 pt-6 border-t">
             <Button
               variant="outline"

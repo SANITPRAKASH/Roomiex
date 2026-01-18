@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 
 interface Review {
   id: string
@@ -66,7 +67,7 @@ export function ReviewSection({ roomId }: ReviewSectionProps) {
 
   const submitReview = async () => {
     if (!user) {
-      alert('Please sign in to leave a review')
+      toast.error('Please sign in to leave a review')
       return
     }
 
@@ -82,20 +83,25 @@ export function ReviewSection({ roomId }: ReviewSectionProps) {
 
       if (error) {
         if (error.code === '23505') {
-          alert("You've already reviewed this room")
+          toast.warning("You've already reviewed this room")
+          setIsSubmitting(false)
           return
         }
         throw error
       }
 
-      alert('Review submitted!')
+      toast.success('Review submitted!', {
+        description: 'Thank you for sharing your feedback',
+      })
       setShowForm(false)
       setRating(5)
       setComment('')
       fetchReviews()
     } catch (error) {
       console.error('Error submitting review:', error)
-      alert('Failed to submit review')
+      toast.error('Failed to submit review', {
+        description: 'Please try again later',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -105,11 +111,14 @@ export function ReviewSection({ roomId }: ReviewSectionProps) {
     try {
       const { error } = await supabase.from('reviews').delete().eq('id', id)
       if (error) throw error
+      
       setReviews((prev) => prev.filter((r) => r.id !== id))
-      alert('Review deleted')
+      toast.success('Review deleted')
     } catch (error) {
       console.error('Error deleting review:', error)
-      alert('Failed to delete review')
+      toast.error('Failed to delete review', {
+        description: 'Please try again',
+      })
     }
   }
 
@@ -227,7 +236,7 @@ export function ReviewSection({ roomId }: ReviewSectionProps) {
                               star <= review.rating
                                 ? 'fill-primary text-primary'
                                 : 'text-muted-foreground'
-                            }`}
+                            }` }
                           />
                         ))}
                       </div>

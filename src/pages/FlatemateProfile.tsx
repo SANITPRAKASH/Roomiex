@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Navbar } from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
+import { toast } from 'sonner'
 
 const lifestyleOptions = {
   schedule: ['Early Bird', 'Night Owl', 'Flexible'],
@@ -41,6 +42,12 @@ export default function FlatmateProfile() {
 
   useEffect(() => {
     if (!authLoading && !user) {
+      toast.error('Please sign in to create your profile', {
+        action: {
+          label: 'Sign In',
+          onClick: () => navigate('/auth')
+        }
+      })
       navigate('/auth')
     }
   }, [user, authLoading, navigate])
@@ -79,6 +86,9 @@ export default function FlatmateProfile() {
       }
     } catch (error) {
       console.error('Error fetching profile:', error)
+      toast.error('Failed to load profile', {
+        description: 'Please refresh the page',
+      })
     } finally {
       setIsLoading(false)
     }
@@ -97,6 +107,18 @@ export default function FlatmateProfile() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user) return
+
+    // Validation
+    if (formData.budget_min && formData.budget_max) {
+      const minBudget = parseFloat(formData.budget_min)
+      const maxBudget = parseFloat(formData.budget_max)
+      if (minBudget > maxBudget) {
+        toast.warning('Invalid budget range', {
+          description: 'Minimum budget cannot be greater than maximum budget',
+        })
+        return
+      }
+    }
 
     setIsSaving(true)
 
@@ -121,19 +143,35 @@ export default function FlatmateProfile() {
           .eq('user_id', user.id)
 
         if (error) throw error
-        alert('Profile updated successfully!')
+        
+        toast.success('Profile updated!', {
+          description: 'Your flatmate profile has been updated',
+          action: {
+            label: 'View',
+            onClick: () => navigate('/flatmates')
+          }
+        })
       } else {
         const { error } = await supabase.from('flatmate_profiles').insert(profileData)
 
         if (error) throw error
+        
         setHasProfile(true)
-        alert('Profile created successfully!')
+        toast.success('Profile created!', {
+          description: 'Start connecting with potential flatmates',
+          action: {
+            label: 'Find Flatmates',
+            onClick: () => navigate('/flatmates')
+          }
+        })
       }
 
       navigate('/flatmates')
     } catch (error) {
       console.error('Error saving profile:', error)
-      alert('Failed to save profile')
+      toast.error('Failed to save profile', {
+        description: 'Please try again or contact support',
+      })
     } finally {
       setIsSaving(false)
     }

@@ -9,6 +9,7 @@ import { Navbar } from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
+import { toast } from 'sonner'
 import type { RoomListing } from '@/lib/supabase'
 
 interface Booking {
@@ -34,6 +35,12 @@ export default function MyBookings() {
 
   useEffect(() => {
     if (!authLoading && !user) {
+      toast.error('Please sign in to view your bookings', {
+        action: {
+          label: 'Sign In',
+          onClick: () => navigate('/auth')
+        }
+      })
       navigate('/auth')
     }
   }, [user, authLoading, navigate])
@@ -68,6 +75,9 @@ export default function MyBookings() {
       setBookings(formattedData)
     } catch (error) {
       console.error('Error fetching bookings:', error)
+      toast.error('Failed to load bookings', {
+        description: 'Please refresh the page to try again',
+      })
     } finally {
       setIsLoading(false)
     }
@@ -86,10 +96,20 @@ export default function MyBookings() {
         prev.map((b) => (b.id === bookingId ? { ...b, status } : b))
       )
 
-      alert(status === 'confirmed' ? 'Booking confirmed!' : 'Booking cancelled')
+      if (status === 'confirmed') {
+        toast.success('Booking confirmed!', {
+          description: 'The visitor has been notified',
+        })
+      } else {
+        toast.success('Booking declined', {
+          description: 'The visitor has been notified',
+        })
+      }
     } catch (error) {
       console.error('Error updating booking:', error)
-      alert('Failed to update booking')
+      toast.error('Failed to update booking', {
+        description: 'Please try again',
+      })
     }
   }
 

@@ -11,6 +11,7 @@ import { ChatDialog } from '@/components/ChatDialog'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { formatCurrency } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface FlatmateProfile {
   id: string
@@ -70,6 +71,9 @@ export default function FindFlatmates() {
       }
     } catch (error) {
       console.error('Error fetching flatmates:', error)
+      toast.error('Failed to load flatmates', {
+        description: 'Please refresh the page to try again',
+      })
     } finally {
       setIsLoading(false)
     }
@@ -92,12 +96,18 @@ export default function FindFlatmates() {
 
   const openChat = (flatmate: FlatmateProfile) => {
     if (!user) {
-      alert('Please login to send messages')
-      navigate('/auth')
+      toast.error('Please sign in to send messages', {
+        action: {
+          label: 'Sign In',
+          onClick: () => navigate('/auth')
+        }
+      })
       return
     }
     if (user.id === flatmate.user_id) {
-      alert('This is your own profile')
+      toast.info('This is your own profile', {
+        description: 'You cannot message yourself',
+      })
       return
     }
     setSelectedFlatmate(flatmate)
@@ -154,9 +164,12 @@ export default function FindFlatmates() {
                 <Users className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No flatmates found</h3>
                 <p className="text-muted-foreground mb-6">
-                  Be the first to create a profile and find flatmates!
+                  {searchLocation 
+                    ? `No flatmates found in "${searchLocation}". Try a different location.`
+                    : 'Be the first to create a profile and find flatmates!'}
                 </p>
                 <Button onClick={() => navigate('/flatmate-profile')}>
+                  <Plus className="w-4 h-4 mr-2" />
                   Create Your Profile
                 </Button>
               </CardContent>

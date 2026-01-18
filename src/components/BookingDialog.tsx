@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
+import { toast } from 'sonner'
 
 interface BookingDialogProps {
   open: boolean
@@ -62,12 +63,12 @@ export function BookingDialog({
     e.preventDefault()
 
     if (!user) {
-      alert('Please sign in to book')
+      toast.error('Please sign in to book')
       return
     }
 
     if (!formData.date || !formData.time) {
-      alert('Please select date and time')
+      toast.warning('Please select date and time')
       return
     }
 
@@ -86,16 +87,22 @@ export function BookingDialog({
 
       if (error) throw error
 
-      alert(
+      toast.success(
         bookingType === 'viewing'
-          ? 'Visit request sent! The owner will confirm shortly.'
-          : 'Trial stay request sent! The owner will confirm shortly.'
+          ? 'Visit request sent!'
+          : 'Trial stay request sent!',
+        {
+          description: 'The owner will confirm shortly.',
+        }
       )
+      
       onOpenChange(false)
       setFormData({ date: '', time: '', message: '' })
     } catch (error) {
       console.error('Error creating booking:', error)
-      alert('Failed to submit request. Please try again.')
+      toast.error('Failed to submit request', {
+        description: 'Please try again or contact support.',
+      })
     } finally {
       setIsSubmitting(false)
     }
