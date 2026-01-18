@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, ChevronDown, User, ArrowUpRight, ArrowDown } from "lucide-react";
+import { Calendar, Clock, ChevronDown, User,  ArrowDown } from "lucide-react";
 
 export default function Blog() {
   const [expandedPost, setExpandedPost] = useState<number | null>(null);

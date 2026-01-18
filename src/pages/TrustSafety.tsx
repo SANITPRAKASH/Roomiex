@@ -3,7 +3,7 @@ import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Shield, CheckCircle, AlertTriangle, UserCheck, Home, Lock, Eye, Flag } from "lucide-react";
+import { CheckCircle,  UserCheck, Home, Lock, Eye, Flag } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function TrustSafety() {

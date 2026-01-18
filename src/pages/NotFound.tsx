@@ -14,7 +14,7 @@ export default function NotFound() {
         <div className="max-w-2xl mx-auto text-center">
           {/* 404 Text */}
           <div className="mb-8">
-            <h1 className="text-35xl md:text-[35rem] font-bold text-gradient leading-none mb-4">
+            <h1 className="text-10xl md:text-[10 rem] font-bold text-gradient leading-none mb-4">
               404
             </h1>
             <div className="h-1 w-32 bg-gradient-to-r from-primary to-secondary mx-auto rounded-full mb-6" />

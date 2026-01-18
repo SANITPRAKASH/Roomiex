@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
@@ -44,29 +44,30 @@ export default function BrowseRooms() {
   ])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
-  const fetchRooms = useCallback(async () => {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('room_listings')
-      .select('id,title,location,price,room_type,photos,amenities,description,available_from,ai_score')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false })
+  // ✅ FIX: Move fetchRooms inside useEffect to avoid dependency warning
+  useEffect(() => {
+    const fetchRooms = async () => {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('room_listings')
+        .select('id,title,location,price,room_type,photos,amenities,description,available_from,ai_score')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
 
-    if (error) {
-      console.error(error)
-      toast.error('Failed to load listings')
-      setRooms([])
+      if (error) {
+        console.error(error)
+        toast.error('Failed to load listings')
+        setRooms([])
+        setLoading(false)
+        return
+      }
+
+      setRooms((data || []) as RoomListing[])
       setLoading(false)
-      return
     }
 
-    setRooms((data || []) as RoomListing[])
-    setLoading(false)
-  }, [])
-
-  useEffect(() => {
     fetchRooms()
-  }, [fetchRooms])
+  }, []) // ✅ Empty dependency array - runs once on mount
 
   const filteredRooms = useMemo(() => {
     return rooms.filter((room) => {

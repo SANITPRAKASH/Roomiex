@@ -1,8 +1,7 @@
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
   Users, Shield, MapPin, Clock, 
-  Sparkles, FileText, MessageSquare, Calculator 
+  Sparkles,  MessageSquare, Calculator 
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 

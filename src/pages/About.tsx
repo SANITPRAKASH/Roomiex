@@ -2,7 +2,7 @@ import { Navbar } from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Heart, Users, Zap, Globe, Shield, Sparkles } from 'lucide-react'
+import { Heart, Users, Globe, Shield, Sparkles } from 'lucide-react'
 
 export default function About() {
   const values = [
