@@ -7,7 +7,16 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "typecheck": "tsc --noEmit",
+    "test": "cypress run",
+    "docker:build": "docker build -t roomiex .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env roomiex",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.965.0",
@@ -41,10 +50,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.10.9",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "cypress": "^15.9.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
