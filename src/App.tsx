@@ -15,6 +15,15 @@ import Messages from './pages/Messages'
 import SavedRooms from './pages/SavedRooms'
 import MyBookings from './pages/MyBookings'
 import FlatmateProfile from './pages/FlatemateProfile'
+import About from './pages/About'
+import Contact from './pages/Contact'
+import Privacy from './pages/Privacy'
+import { Terms } from './pages/Terms'
+import RentCalculator from './pages/RentCalculator'
+import Careers from './pages/Careers'
+import Blog from './pages/Blog'
+import TrustSafety from './pages/TrustSafety'
+import Verification from './pages/Verification'
 
 function App() {
   return (
@@ -28,6 +37,16 @@ function App() {
           <Route path="/room-scorer" element={<RoomScorer />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/flatmates" element={<FindFlatmates />} />
+             <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/rent-calculator" element={<RentCalculator />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/trust-and-safety" element={<TrustSafety />} />
+            <Route path="/verification" element={<Verification />} />
+          
           
           {/* Protected Routes (require auth) */}
           <Route path="/list-room" element={<ListRoom />} />

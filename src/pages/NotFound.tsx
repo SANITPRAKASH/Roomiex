@@ -62,9 +62,9 @@ export default function NotFound() {
                 My Profile
               </Link>
               <span className="text-muted-foreground">•</span>
-              <a href="#" className="text-primary hover:underline">
+              <Link to="/contact" className="text-primary hover:underline">
                 Contact Support
-              </a>
+              </Link>
             </div>
           </div>
         </div>

@@ -711,7 +711,7 @@ export default function ListRoom() {
                         onClick={publishListing}
                         disabled={isPublishing}
                         size="lg"
-                        className="w-full h-14 text-lg"
+                        className="w-full h-14 text-lg cursor-pointer"
                       >
                         {isPublishing ? (
                           <>
