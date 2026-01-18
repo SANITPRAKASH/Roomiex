@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
-import { rooms } from '@/data/rooms'
-import { Navbar } from '@/components/Navbar'
-import { Footer } from '@/components/Footer'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { BookingDialog } from '@/components/BookingDialog'
-import { ChatDialog } from '@/components/ChatDialog'
-import { ReviewSection } from '@/components/ReviewSection'
-import { SaveRoomButton } from '@/components/SaveRoomBotton'
-import { useAuth } from '@/hooks/useAuth'
-import { supabase } from '@/lib/supabase'
-import { toast } from 'sonner'
+import { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { rooms } from "@/data/rooms";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { BookingDialog } from "@/components/BookingDialog";
+import { ChatDialog } from "@/components/ChatDialog";
+import { ReviewSection } from "@/components/ReviewSection";
+import { SaveRoomButton } from "@/components/SaveRoomBotton";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Shield,
@@ -32,29 +32,32 @@ import {
   Calendar,
   CheckCircle2,
   Loader2,
-} from 'lucide-react'
-import { motion } from 'framer-motion'
+} from "lucide-react";
+import { motion } from "framer-motion";
 
 interface DbRoom {
-  id: string
-  title: string
-  location: string
-  price: number
-  room_type: string
-  description: string | null
-  amenities: string[] | null
-  photos: string[] | null
-  ai_score: number | null
-  user_id: string | null
-  available_from: string | null
-  status: string | null
+  id: string;
+  title: string;
+  location: string;
+  price: number;
+  room_type: string;
+  description: string | null;
+  amenities: string[] | null;
+  photos: string[] | null;
+  ai_score: number | null;
+  user_id: string | null;
+  available_from: string | null;
+  status: string | null;
 }
 
-const amenityIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+const amenityIcons: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
   WiFi: Wifi,
   AC: Wind,
   Parking: Car,
-  'Gym Access': Dumbbell,
+  "Gym Access": Dumbbell,
   Gym: Dumbbell,
   Kitchen: Coffee,
   Workspace: Briefcase,
@@ -62,122 +65,161 @@ const amenityIcons: Record<string, React.ComponentType<{ className?: string }>> 
   Events: Users,
   Balcony: Wind,
   Garden: Coffee,
-  'Power Backup': Wifi,
-  'Meals Included': Coffee,
+  "Power Backup": Wifi,
+  "Meals Included": Coffee,
   Housekeeping: CheckCircle2,
-  'Study Table': Briefcase,
-  'Washing Machine': CheckCircle2,
-}
+  "Study Table": Briefcase,
+  "Washing Machine": CheckCircle2,
+};
 
 export default function RoomDetail() {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const { user } = useAuth()
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const [dbRoom, setDbRoom] = useState<DbRoom | null>(null)
-  const [ownerProfile, setOwnerProfile] = useState<{ full_name: string | null } | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [chatOpen, setChatOpen] = useState(false)
-  const [bookingOpen, setBookingOpen] = useState(false)
-  const [bookingType, setBookingType] = useState<'viewing' | 'trial_stay'>('viewing')
+  const [dbRoom, setDbRoom] = useState<DbRoom | null>(null);
+  const [ownerProfile, setOwnerProfile] = useState<{
+    full_name: string | null;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingType, setBookingType] = useState<"viewing" | "trial_stay">(
+    "viewing",
+  );
 
   // Check if this is a static room (numeric id like "1", "2", etc.)
-  const isStaticRoom = id ? /^\d+$/.test(id) : false
-  const staticRoom = isStaticRoom ? rooms.find((r) => r.id === id) : null
+  const isStaticRoom = id ? /^\d+$/.test(id) : false;
+  const staticRoom = isStaticRoom ? rooms.find((r) => r.id === id) : null;
 
   useEffect(() => {
     if (!isStaticRoom && id) {
-      fetchDbRoom()
+      fetchDbRoom();
     } else {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [id, isStaticRoom])
+  }, [id, isStaticRoom]);
 
   const fetchDbRoom = async () => {
-    if (!id) return
+    if (!id) return;
 
     try {
       const { data, error } = await supabase
-        .from('room_listings')
-        .select('*')
-        .eq('id', id)
-        .single()
+        .from("room_listings")
+        .select("*")
+        .eq("id", id)
+        .single();
 
-      if (error) throw error
-      setDbRoom(data)
+      if (error) throw error;
+      setDbRoom(data);
 
       // Fetch owner profile
       if (data.user_id) {
         const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('user_id', data.user_id)
-          .single()
-        setOwnerProfile(profile)
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", data.user_id)
+          .single();
+        setOwnerProfile(profile);
       }
     } catch (error) {
-      console.error('Error fetching room:', error)
+      console.error("Error fetching room:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const handleAction = (action: 'chat' | 'viewing' | 'trial_stay') => {
+  const handleAction = (action: "chat" | "viewing" | "trial_stay") => {
     if (!user) {
-      toast.error('Please sign in to continue')
-      navigate('/auth')
-      return
+      toast.error("Please sign in to continue");
+      navigate("/auth");
+      return;
     }
 
     if (isStaticRoom) {
-      toast.error('This is a demo room. Actions are only available for real listings.')
-      return
+      toast.error(
+        "This is a demo room. Actions are only available for real listings.",
+      );
+      return;
     }
 
     if (dbRoom?.user_id === user.id) {
-      toast.error('You cannot perform this action on your own listing')
-      return
+      toast.error("You cannot perform this action on your own listing");
+      return;
     }
 
-    if (action === 'chat') {
-      setChatOpen(true)
+    if (action === "chat") {
+      setChatOpen(true);
     } else {
-      setBookingType(action)
-      setBookingOpen(true)
+      setBookingType(action);
+      setBookingOpen(true);
     }
-  }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: room?.title || "Check out this room",
+      text: `${room?.title} - ₹${room?.price.toLocaleString()}/month in ${room?.location}`,
+      url: window.location.href,
+    };
+
+    try {
+      // Check if Web Share API is available (primarily mobile)
+      if (navigator.share) {
+        await navigator.share(shareData);
+
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard!");
+      }
+    } catch (error) {
+      // User cancelled or error occurred
+      if (error instanceof Error && error.name !== "AbortError") {
+        // Try clipboard as final fallback
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          toast.success("Link copied to clipboard!");
+        } catch {
+          toast.error("Failed to share. Please copy the URL manually.");
+        }
+      }
+    }
+  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
-    )
+    );
   }
 
   // Use either static room or db room data
-  const room = staticRoom || (dbRoom
-    ? {
-        id: dbRoom.id,
-        title: dbRoom.title,
-        location: dbRoom.location,
-        price: dbRoom.price,
-        image: dbRoom.photos?.[0] || '',
-        roomType: dbRoom.room_type as 'private' | 'shared' | 'pg',
-        bathroomType: 'shared' as const,
-        furnishing: 'fully' as const,
-        flatmates: 0,
-        qualityScore: dbRoom.ai_score || 0,
-        matchScore: undefined,
-        isVerified: false,
-        amenities: dbRoom.amenities || [],
-        commute: undefined,
-        availableFrom: dbRoom.available_from || 'Available Now',
-        ownerName: ownerProfile?.full_name || 'Room Owner',
-        ownerVerified: false,
-        description: dbRoom.description || '',
-      }
-    : null)
+  const room =
+    staticRoom ||
+    (dbRoom
+      ? {
+          id: dbRoom.id,
+          title: dbRoom.title,
+          location: dbRoom.location,
+          price: dbRoom.price,
+          image: dbRoom.photos?.[0] || "",
+          roomType: dbRoom.room_type as "private" | "shared" | "pg",
+          bathroomType: "shared" as const,
+          furnishing: "fully" as const,
+          flatmates: 0,
+          qualityScore: dbRoom.ai_score || 0,
+          matchScore: undefined,
+          isVerified: false,
+          amenities: dbRoom.amenities || [],
+          commute: undefined,
+          availableFrom: dbRoom.available_from || "Available Now",
+          ownerName: ownerProfile?.full_name || "Room Owner",
+          ownerVerified: false,
+          description: dbRoom.description || "",
+        }
+      : null);
 
   if (!room) {
     return (
@@ -189,18 +231,18 @@ export default function RoomDetail() {
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   const getMatchColor = (score: number) => {
-    if (score >= 85) return 'text-match-high'
-    if (score >= 70) return 'text-match-medium'
-    return 'text-match-low'
-  }
+    if (score >= 85) return "text-match-high";
+    if (score >= 70) return "text-match-medium";
+    return "text-match-low";
+  };
 
-  const isDbRoom = !isStaticRoom && !!dbRoom
-  const ownerId = dbRoom?.user_id || ''
-  const ownerName = ownerProfile?.full_name || 'Room Owner'
+  const isDbRoom = !isStaticRoom && !!dbRoom;
+  const ownerId = dbRoom?.user_id || "";
+  const ownerName = ownerProfile?.full_name || "Room Owner";
 
   return (
     <div className="min-h-screen bg-background">
@@ -235,7 +277,10 @@ export default function RoomDetail() {
                 {/* Badges */}
                 <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                   {room.isVerified && (
-                    <Badge variant="default" className="backdrop-blur-sm bg-green-500">
+                    <Badge
+                      variant="default"
+                      className="backdrop-blur-sm bg-green-500"
+                    >
                       <Shield className="w-3 h-3" />
                       Verified
                     </Badge>
@@ -257,10 +302,14 @@ export default function RoomDetail() {
 
                 {/* Actions */}
                 <div className="absolute top-4 right-4 flex gap-2">
-                  <button className="p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors">
+                  <button
+                    onClick={handleShare}
+                    className="p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+                    aria-label="Share room"
+                  >
                     <Share2 className="w-4 h-4" />
                   </button>
-                  <SaveRoomButton roomId={id || ''} isDbRoom={isDbRoom} />
+                  <SaveRoomButton roomId={id || ""}  />
                 </div>
               </motion.div>
 
@@ -270,7 +319,9 @@ export default function RoomDetail() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <h1 className="text-2xl md:text-3xl font-bold mb-2">{room.title}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold mb-2">
+                  {room.title}
+                </h1>
                 <div className="flex items-center gap-2 text-muted-foreground mb-4">
                   <MapPin className="w-4 h-4" />
                   {room.location}
@@ -292,12 +343,14 @@ export default function RoomDetail() {
                   {room.bathroomType} Bathroom
                 </Badge>
                 <Badge variant="outline" className="px-3 py-1.5">
-                  <span className="capitalize">{room.furnishing} Furnished</span>
+                  <span className="capitalize">
+                    {room.furnishing} Furnished
+                  </span>
                 </Badge>
                 {room.flatmates > 0 && (
                   <Badge variant="outline" className="px-3 py-1.5">
                     <Users className="w-3.5 h-3.5" />
-                    {room.flatmates} Flatmate{room.flatmates > 1 ? 's' : ''}
+                    {room.flatmates} Flatmate{room.flatmates > 1 ? "s" : ""}
                   </Badge>
                 )}
               </motion.div>
@@ -310,7 +363,9 @@ export default function RoomDetail() {
                 transition={{ delay: 0.2 }}
               >
                 <h2 className="text-lg font-semibold mb-3">About this room</h2>
-                <p className="text-muted-foreground leading-relaxed">{room.description}</p>
+                <p className="text-muted-foreground leading-relaxed">
+                  {room.description}
+                </p>
               </motion.div>
 
               {/* Amenities */}
@@ -324,7 +379,7 @@ export default function RoomDetail() {
                   <h2 className="text-lg font-semibold mb-4">Amenities</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {room.amenities.map((amenity) => {
-                      const Icon = amenityIcons[amenity] || CheckCircle2
+                      const Icon = amenityIcons[amenity] || CheckCircle2;
                       return (
                         <div
                           key={amenity}
@@ -333,7 +388,7 @@ export default function RoomDetail() {
                           <Icon className="w-5 h-5 text-primary" />
                           <span className="text-sm">{amenity}</span>
                         </div>
-                      )
+                      );
                     })}
                   </div>
                 </motion.div>
@@ -352,8 +407,12 @@ export default function RoomDetail() {
                       <Clock className="w-5 h-5 text-secondary" />
                     </div>
                     <div>
-                      <p className="font-medium">{room.commute.time} min commute</p>
-                      <p className="text-sm text-muted-foreground">to {room.commute.location}</p>
+                      <p className="font-medium">
+                        {room.commute.time} min commute
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        to {room.commute.location}
+                      </p>
                     </div>
                   </div>
                 </motion.div>
@@ -365,7 +424,7 @@ export default function RoomDetail() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.35 }}
               >
-                <ReviewSection roomId={id || ''} isDbRoom={isDbRoom} />
+                <ReviewSection roomId={id || ""}  />
               </motion.div>
             </div>
 
@@ -379,7 +438,9 @@ export default function RoomDetail() {
               >
                 {/* Price */}
                 <div className="mb-6">
-                  <span className="text-3xl font-bold">₹{room.price.toLocaleString()}</span>
+                  <span className="text-3xl font-bold">
+                    ₹{room.price.toLocaleString()}
+                  </span>
                   <span className="text-muted-foreground">/month</span>
                 </div>
 
@@ -392,10 +453,14 @@ export default function RoomDetail() {
                       <Sparkles className="w-6 h-6 text-primary-foreground" />
                     </div>
                     <div>
-                      <p className={`text-2xl font-bold ${getMatchColor(room.matchScore)}`}>
+                      <p
+                        className={`text-2xl font-bold ${getMatchColor(room.matchScore)}`}
+                      >
                         {room.matchScore}%
                       </p>
-                      <p className="text-sm text-muted-foreground">Compatibility Match</p>
+                      <p className="text-sm text-muted-foreground">
+                        Compatibility Match
+                      </p>
                     </div>
                   </div>
                 )}
@@ -415,9 +480,13 @@ export default function RoomDetail() {
                   <div className="flex-1">
                     <p className="font-medium flex items-center gap-2">
                       {ownerName}
-                      {room.ownerVerified && <Shield className="w-4 h-4 text-green-500" />}
+                      {room.ownerVerified && (
+                        <Shield className="w-4 h-4 text-green-500" />
+                      )}
                     </p>
-                    <p className="text-xs text-muted-foreground">Property Owner</p>
+                    <p className="text-xs text-muted-foreground">
+                      Property Owner
+                    </p>
                   </div>
                 </div>
 
@@ -427,7 +496,7 @@ export default function RoomDetail() {
                     variant="default"
                     size="lg"
                     className="w-full gap-2"
-                    onClick={() => handleAction('chat')}
+                    onClick={() => handleAction("chat")}
                     disabled={isStaticRoom}
                   >
                     <MessageSquare className="w-4 h-4" />
@@ -437,7 +506,7 @@ export default function RoomDetail() {
                     variant="outline"
                     size="lg"
                     className="w-full gap-2"
-                    onClick={() => handleAction('viewing')}
+                    onClick={() => handleAction("viewing")}
                     disabled={isStaticRoom}
                   >
                     <Calendar className="w-4 h-4" />
@@ -447,7 +516,7 @@ export default function RoomDetail() {
                     variant="ghost"
                     size="lg"
                     className="w-full gap-2"
-                    onClick={() => handleAction('trial_stay')}
+                    onClick={() => handleAction("trial_stay")}
                     disabled={isStaticRoom}
                   >
                     Book Trial Stay
@@ -456,14 +525,15 @@ export default function RoomDetail() {
 
                 {isStaticRoom && (
                   <p className="text-xs text-muted-foreground text-center mt-4 p-3 bg-muted/50 rounded-lg">
-                    This is a demo room. Create an account and list your own room to enable these
-                    features.
+                    This is a demo room. Create an account and list your own
+                    room to enable these features.
                   </p>
                 )}
 
                 {/* Trust Note */}
                 <p className="text-xs text-muted-foreground text-center mt-6">
-                  All communications are secure & anonymous until you choose to share details.
+                  All communications are secure & anonymous until you choose to
+                  share details.
                 </p>
               </motion.div>
             </div>
@@ -479,7 +549,7 @@ export default function RoomDetail() {
           <ChatDialog
             open={chatOpen}
             onOpenChange={setChatOpen}
-            roomId={id || ''}
+            roomId={id || ""}
             receiverId={ownerId}
             receiverName={ownerName}
           />
@@ -487,7 +557,7 @@ export default function RoomDetail() {
           <BookingDialog
             open={bookingOpen}
             onOpenChange={setBookingOpen}
-            roomId={id || ''}
+            roomId={id || ""}
             ownerId={ownerId}
             roomTitle={room.title}
             bookingType={bookingType}
@@ -495,5 +565,5 @@ export default function RoomDetail() {
         </>
       )}
     </div>
-  )
+  );
 }

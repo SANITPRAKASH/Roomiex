@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import {
   Home,
   Menu,
@@ -10,121 +10,124 @@ import {
   Calendar,
   Heart,
   Sparkles,
-} from 'lucide-react'
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useAuth } from '@/hooks/useAuth'
-import { supabase } from '@/lib/supabase'
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/lib/supabase";
 
 export function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
-  const { user, isLoading } = useAuth()
-  const [unreadCount, setUnreadCount] = useState(0)
-  const [savedCount, setSavedCount] = useState(0)
-  const [pendingBookingsCount, setPendingBookingsCount] = useState(0)
+  const [isOpen, setIsOpen] = useState(false);
+  const { user, isLoading } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [savedCount, setSavedCount] = useState(0);
+  const [pendingBookingsCount, setPendingBookingsCount] = useState(0);
 
   useEffect(() => {
     if (!user) {
-      setUnreadCount(0)
-      setSavedCount(0)
-      setPendingBookingsCount(0)
+      const resetCounts = () => {
+        setUnreadCount(0);
+        setSavedCount(0);
+        setPendingBookingsCount(0);
+      };
+      resetCounts();
       return
     }
 
     const fetchUnreadCount = async () => {
       try {
         const { count } = await supabase
-          .from('messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('receiver_id', user.id)
-          .eq('read', false)
-        setUnreadCount(count || 0)
+          .from("messages")
+          .select("*", { count: "exact", head: true })
+          .eq("receiver_id", user.id)
+          .eq("read", false);
+        setUnreadCount(count || 0);
       } catch (error) {
-        console.error('Error fetching unread count:', error)
+        console.error("Error fetching unread count:", error);
       }
-    }
+    };
 
     const fetchSavedCount = async () => {
       try {
         const { count } = await supabase
-          .from('saved_rooms')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-        setSavedCount(count || 0)
+          .from("saved_rooms")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id);
+        setSavedCount(count || 0);
       } catch (error) {
-        console.error('Error fetching saved count:', error)
+        console.error("Error fetching saved count:", error);
       }
-    }
+    };
 
     const fetchPendingBookingsCount = async () => {
       try {
         // Count bookings where user is the owner AND status is pending
         const { count } = await supabase
-          .from('bookings')
-          .select('*', { count: 'exact', head: true })
-          .eq('owner_id', user.id)
-          .eq('status', 'pending')
-        setPendingBookingsCount(count || 0)
+          .from("bookings")
+          .select("*", { count: "exact", head: true })
+          .eq("owner_id", user.id)
+          .eq("status", "pending");
+        setPendingBookingsCount(count || 0);
       } catch (error) {
-        console.error('Error fetching pending bookings count:', error)
+        console.error("Error fetching pending bookings count:", error);
       }
-    }
+    };
 
-    fetchUnreadCount()
-    fetchSavedCount()
-    fetchPendingBookingsCount()
+    fetchUnreadCount();
+    fetchSavedCount();
+    fetchPendingBookingsCount();
 
     // Real-time subscription for unread messages
     const messagesChannel = supabase
       .channel(`unread-messages-${user.id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'messages',
+          event: "*",
+          schema: "public",
+          table: "messages",
           filter: `receiver_id=eq.${user.id}`,
         },
-        fetchUnreadCount
+        fetchUnreadCount,
       )
-      .subscribe()
+      .subscribe();
 
     // Real-time subscription for saved rooms
     const savedChannel = supabase
       .channel(`saved-rooms-${user.id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'saved_rooms',
+          event: "*",
+          schema: "public",
+          table: "saved_rooms",
           filter: `user_id=eq.${user.id}`,
         },
-        fetchSavedCount
+        fetchSavedCount,
       )
-      .subscribe()
+      .subscribe();
 
     // Real-time subscription for pending bookings
     const bookingsChannel = supabase
       .channel(`pending-bookings-${user.id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'bookings',
+          event: "*",
+          schema: "public",
+          table: "bookings",
           filter: `owner_id=eq.${user.id}`,
         },
-        fetchPendingBookingsCount
+        fetchPendingBookingsCount,
       )
-      .subscribe()
+      .subscribe();
 
     return () => {
-      supabase.removeChannel(messagesChannel)
-      supabase.removeChannel(savedChannel)
-      supabase.removeChannel(bookingsChannel)
-    }
-  }, [user])
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(savedChannel);
+      supabase.removeChannel(bookingsChannel);
+    };
+  }, [user]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
@@ -175,7 +178,7 @@ export function Navbar() {
                       animate={{ scale: 1 }}
                       className="absolute -top-1 -right-3 min-w-[18px] h-[18px] px-1 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center font-bold"
                     >
-                      {savedCount > 99 ? '99+' : savedCount}
+                      {savedCount > 99 ? "99+" : savedCount}
                     </motion.span>
                   )}
                 </Link>
@@ -189,10 +192,14 @@ export function Navbar() {
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 15,
+                      }}
                       className="absolute -top-1 -right-3 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold shadow-lg"
                     >
-                      {unreadCount > 99 ? '99+' : unreadCount}
+                      {unreadCount > 99 ? "99+" : unreadCount}
                     </motion.span>
                   )}
                 </Link>
@@ -206,10 +213,14 @@ export function Navbar() {
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 15,
+                      }}
                       className="absolute -top-1 -right-3 min-w-[18px] h-[18px] px-1 bg-orange-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold shadow-lg"
                     >
-                      {pendingBookingsCount > 99 ? '99+' : pendingBookingsCount}
+                      {pendingBookingsCount > 99 ? "99+" : pendingBookingsCount}
                     </motion.span>
                   )}
                 </Link>
@@ -255,7 +266,7 @@ export function Navbar() {
           {isOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
               className="md:hidden overflow-hidden"
@@ -296,7 +307,7 @@ export function Navbar() {
                       </div>
                       {savedCount > 0 && (
                         <span className="min-w-[20px] h-5 px-1.5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center font-bold">
-                          {savedCount > 99 ? '99+' : savedCount}
+                          {savedCount > 99 ? "99+" : savedCount}
                         </span>
                       )}
                     </Link>
@@ -311,7 +322,7 @@ export function Navbar() {
                       </div>
                       {unreadCount > 0 && (
                         <span className="min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                          {unreadCount > 99 ? '99+' : unreadCount}
+                          {unreadCount > 99 ? "99+" : unreadCount}
                         </span>
                       )}
                     </Link>
@@ -326,14 +337,20 @@ export function Navbar() {
                       </div>
                       {pendingBookingsCount > 0 && (
                         <span className="min-w-[20px] h-5 px-1.5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                          {pendingBookingsCount > 99 ? '99+' : pendingBookingsCount}
+                          {pendingBookingsCount > 99
+                            ? "99+"
+                            : pendingBookingsCount}
                         </span>
                       )}
                     </Link>
                   </>
                 )}
                 <div className="flex gap-2 mt-2 px-4">
-                  <Link to="/list-room" className="flex-1" onClick={() => setIsOpen(false)}>
+                  <Link
+                    to="/list-room"
+                    className="flex-1"
+                    onClick={() => setIsOpen(false)}
+                  >
                     <Button variant="outline" size="sm" className="w-full">
                       List Room
                     </Button>
@@ -343,14 +360,22 @@ export function Navbar() {
                       <Loader2 className="w-4 h-4 animate-spin" />
                     </div>
                   ) : user ? (
-                    <Link to="/profile" className="flex-1" onClick={() => setIsOpen(false)}>
+                    <Link
+                      to="/profile"
+                      className="flex-1"
+                      onClick={() => setIsOpen(false)}
+                    >
                       <Button size="sm" className="w-full gap-2">
                         <User className="w-4 h-4" />
                         Profile
                       </Button>
                     </Link>
                   ) : (
-                    <Link to="/auth" className="flex-1" onClick={() => setIsOpen(false)}>
+                    <Link
+                      to="/auth"
+                      className="flex-1"
+                      onClick={() => setIsOpen(false)}
+                    >
                       <Button size="sm" className="w-full">
                         Sign In
                       </Button>
@@ -363,5 +388,5 @@ export function Navbar() {
         </AnimatePresence>
       </div>
     </nav>
-  )
+  );
 }

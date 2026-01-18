@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { Send, Loader2, Circle, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Dialog,
   DialogContent,
