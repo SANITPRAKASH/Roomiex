@@ -39,7 +39,7 @@ jobs:
         with:
           build: npm run build
           start: npm run preview
-          wait-on: 'http://localhost:5173'
+          wait-on: 'http://localhost:4173'
           wait-on-timeout: 120
           browser: chrome
         env:
