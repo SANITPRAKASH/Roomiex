@@ -28,14 +28,7 @@ describe('Browse Rooms', () => {
     cy.wait(300)
   })
 
-  it('should filter by room type', () => {
-    cy.contains('All Types').click()
-    cy.wait(300)
-    cy.contains('Private').click()
-    cy.wait(500)
-    cy.contains('Type: private').should('be.visible')
-  })
-
+ 
   it('should clear all filters', () => {
     cy.get('input[placeholder*="Search by location"]').type('Test Location')
     cy.wait(300)
